@@ -11,24 +11,27 @@ contract Remittance  is Ownable {
      }
     mapping(bytes32 => ExchangeType) public hashExchangeMapper;
     
-    event Remit(address exchangeAddress, uint valueSent);
-    event WithDraw(address exchangeAddress, uint amountWithDraw);
-    event WarningToWithDrawBeforeRemit(address exchangeAddress, uint amountWithDraw);
+    event LogRemit(address sender, ExchangeType exchangeType, bytes32 hash);
+    event LogWithDraw(address exchangeAddress, uint amountWithDraw);
+    event LogWarningToWithDrawBeforeRemit(address exchangeAddress, uint amountWithDraw);
     
-    function getHash(bytes32 password1,bytes32 password2) public pure returns(bytes32) {
-        return  keccak256(password1,password2);
+    function getHash(address exchange,bytes32 password1,bytes32 password2) public pure returns(bytes32) {
+        return  keccak256(exchange,password1,password2);
     }
     
-    function remit(bytes32 hash) public payable {
+    function remit(bytes32 hash, address exchange) public payable {
         require(msg.value>0);
         require(hash!=bytes32(0));
         require(hashExchangeMapper[hash].amount==0);
+        require(exchange!=address(0));
+        //To make sure sender is not the one who is remitting.
+        require(msg.sender!=exchange);
 
        ExchangeType memory exchangeType;
-       exchangeType.exchange = msg.sender;
+       exchangeType.exchange = exchange;
        exchangeType.amount += msg.value;
        hashExchangeMapper[hash] = exchangeType;
-       Remit(msg.sender,msg.value);
+       LogRemit(msg.sender,exchangeType,hash);
         
     }
      
@@ -40,9 +43,10 @@ contract Remittance  is Ownable {
 
     //Change state before transer
     hashExchangeMapper[hash].amount = 0;
+    LogWithDraw(msg.sender,amount);
     //Send the amount
     msg.sender.transfer(amount);
-    WithDraw(msg.sender,amount);
+    
 
   } 
 }
