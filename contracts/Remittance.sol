@@ -11,9 +11,9 @@ contract Remittance  is Ownable {
      }
     mapping(bytes32 => ExchangeType) public hashExchangeMapper;
     
-    event LogRemit(address sender, ExchangeType exchangeType, bytes32 hash);
-    event LogWithDraw(address exchangeAddress, uint amountWithDraw);
-    event LogWarningToWithDrawBeforeRemit(address exchangeAddress, uint amountWithDraw);
+    event LogRemit(address indexed sender, ExchangeType indexed exchangeType, bytes32 indexed hash);
+    event LogWithDraw(address indexed exchangeAddress, uint indexed amountWithDraw);
+    event LogWarningToWithDrawBeforeRemit(address indexed exchangeAddress, uint indexed amountWithDraw);
     
     function getHash(address exchange,bytes32 password1,bytes32 password2) public pure returns(bytes32) {
         return  keccak256(exchange,password1,password2);
